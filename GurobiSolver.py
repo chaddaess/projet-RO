@@ -70,7 +70,7 @@ class GurobiSolver:
         return self.model.objVal
 
 
-# # Example Usage:
+# Example Usage:
 # if __name__ == "__main__":
 #     builder = GurobiSolverBuilder()
 #     prix = [700, 900]
