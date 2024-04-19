@@ -1,7 +1,26 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QGridLayout
-#%%
+# GUI styles
+style_sheet = """
+    QWidget {
+        background-color: #2b2b2b;
+    }
+    QPushButton {
+        background-color: #33a6cc;
+        color: white;
+        font-size: 16px;
+        padding: 5px;
+        border-radius: 5px;
+    }
+    QPushButton:hover {
+        background-color: #80d7ff;
+    }
+    QPushButton:pressed {
+        background-color: #258399;
+    }
+"""
 
+# GUI definition
 class ToyFactoryGUI(QWidget):
     def __init__(self):
         super().__init__()
@@ -13,23 +32,39 @@ class ToyFactoryGUI(QWidget):
         self.layout = QVBoxLayout()
 
         # input field for maximum work hours per day
-        self.max_hours_input = QLineEdit()
-        self.max_hours_input.setPlaceholderText('Maximum work hours per day')
-        self.layout.addWidget(self.max_hours_input)
+        self.max_hours_per_worker_label=QLabel('Maximum  hours of work (per worker) per day')
+        self.max_hours_per_worker_input = QLineEdit()
+        self.layout.addWidget(self.max_hours_per_worker_label)
+        self.layout.addWidget(self.max_hours_per_worker_input)
+
+        #input field for maximum hours of machine work per day
+        self.max_hours_machine_label=QLabel('Maximum  hours of machine work per day')
+        self.max_hours_machine_input = QLineEdit()
+        self.layout.addWidget(self.max_hours_machine_label)
+        self.layout.addWidget(self.max_hours_machine_input)
 
         # input field for maximum kilos of wood per day
+        self.max_wood_label=QLabel('Maximum  kilos of wood  per day')
         self.max_wood_input = QLineEdit()
-        self.max_wood_input.setPlaceholderText('Maximum kilos of wood per day')
+        self.layout.addWidget(self.max_wood_label)
         self.layout.addWidget(self.max_wood_input)
 
+        # input field for number of workers per day
+        self.max_workers_label=QLabel('Number of workers available per day')
+        self.max_workers_input=QLineEdit()
+        self.layout.addWidget(self.max_workers_label)
+        self.layout.addWidget(self.max_workers_input)
+
         # input field for salary/hour
+        self.salary_label=QLabel('Salary of one worker per hour')
         self.salary_input = QLineEdit()
-        self.salary_input.setPlaceholderText('Salary per hour')
+        self.layout.addWidget(self.salary_label)
         self.layout.addWidget(self.salary_input)
 
         # input field for price of one kilo of wood
+        self.wood_price_label=QLabel('Price of one kilo of wood')
         self.wood_price_input = QLineEdit()
-        self.wood_price_input.setPlaceholderText('Price of 1kg of wood')
+        self.layout.addWidget(self.wood_price_label)
         self.layout.addWidget(self.wood_price_input)
 
         # button to add toy
@@ -51,8 +86,8 @@ class ToyFactoryGUI(QWidget):
 
     def add_toy(self):
         # Create a new tuple for the inputs of the current toy
-        toy_inputs = (QLineEdit(), QLineEdit(), QLineEdit(), QLineEdit())
-        labels = ['Hours of work', 'Kilos of wood', 'Selling price', 'Maximum sold']
+        toy_inputs = (QLineEdit(), QLineEdit(), QLineEdit(), QLineEdit(),QLineEdit())
+        labels = ['Hours of manual work', 'Hours of machine work', 'Kilos of wood', 'Selling price', 'Maximum sold']
 
         # Add the QLineEdit objects to the grid layout
         row = len(self.toy_inputs)+1  # Add 1 to account for the labels row
@@ -64,13 +99,13 @@ class ToyFactoryGUI(QWidget):
         if row !=1:
             remove_btn = QPushButton('Remove')
             remove_btn.clicked.connect(lambda: self.remove_toy(row))
-            self.input_grid_layout.addWidget(remove_btn, row, 4)
+            self.input_grid_layout.addWidget(remove_btn, row, 5)
             self.toy_inputs.append(toy_inputs)
         else:
             self.toy_inputs.append(toy_inputs)
 
     def remove_toy(self, row):
-        for i in range(5):
+        for i in range(6):
             # get input at coordinates (row,i)
             item = self.input_grid_layout.itemAtPosition(row, i)
             if item:
@@ -84,21 +119,25 @@ class ToyFactoryGUI(QWidget):
     def solve(self):
         #data extraction from GUI
         nb_toys = len(self.toy_inputs)
-        max_hours = float(self.max_hours_input.text())
+        max_hours_per_worker = float(self.max_hours_per_worker_input.text())
+        max_machine_hours = float(self.max_hours_machine_input.text())
         max_wood = float(self.max_wood_input.text())
         wood_price = float(self.wood_price_input.text())
+        max_nb_workers = float(self.max_workers_input.text())
         salary_hour = float(self.salary_input.text())
-        availability_resources = [max_hours, max_wood]
+        max_hours_manual_work = max_hours_per_worker*max_nb_workers
+        availability_resources = [max_hours_manual_work, max_machine_hours, max_wood, max_nb_workers]
         benefits = []
         consumption_resources = []
         demand_constraints = []
         for toy_input in self.toy_inputs:
             hours = float(toy_input[0].text())
-            wood = float(toy_input[1].text())
-            price = float(toy_input[2].text())
-            demand = float(toy_input[3].text())
+            machine_hours = float(toy_input[1].text())
+            wood = float(toy_input[2].text())
+            price = float(toy_input[3].text())
+            demand = float(toy_input[4].text())
             toy_benefit = price - wood * wood_price - hours * salary_hour
-            toy_consumption_resources = [hours, wood]
+            toy_consumption_resources = [hours, machine_hours, wood]
             benefits.append(toy_benefit)
             consumption_resources.append(toy_consumption_resources)
             demand_constraints.append(demand)
@@ -107,9 +146,12 @@ class ToyFactoryGUI(QWidget):
         print("benefits", benefits)
         print("availabilty resources",availability_resources)
 
-#%%
+
+# instantiate and display the GUI
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    #apply styles
+    # app.setStyleSheet(style_sheet)
     window = ToyFactoryGUI()
     window.show()
     sys.exit(app.exec_())
