@@ -50,22 +50,18 @@ class ToyFactoryGUI(QWidget):
         self.setLayout(self.layout)
 
     def add_toy(self):
-        # Create labels for each column
-        labels = ['Hours of work', 'Kilos of wood', 'Selling price', 'Maximum sold']
-        for col, label_text in enumerate(labels):
-            label = QLabel(label_text)
-            self.input_grid_layout.addWidget(label, 0, col)
-
         # Create a new tuple for the inputs of the current toy
         toy_inputs = (QLineEdit(), QLineEdit(), QLineEdit(), QLineEdit())
+        labels = ['Hours of work', 'Kilos of wood', 'Selling price', 'Maximum sold']
 
         # Add the QLineEdit objects to the grid layout
-        row = len(self.toy_inputs) + 1  # Add 1 to account for the labels row
+        row = len(self.toy_inputs)+1  # Add 1 to account for the labels row
         for col, toy_input in enumerate(toy_inputs):
+            toy_input.setPlaceholderText(labels[col])
             self.input_grid_layout.addWidget(toy_input, row, col)
 
         # Add a remove button for each toy except the first
-        if row != 1:
+        if row !=1:
             remove_btn = QPushButton('Remove')
             remove_btn.clicked.connect(lambda: self.remove_toy(row))
             self.input_grid_layout.addWidget(remove_btn, row, 4)
@@ -83,19 +79,7 @@ class ToyFactoryGUI(QWidget):
                 if widget:
                     # safely delete cell
                     widget.deleteLater()
-        self.toy_inputs.pop(row)
-        self.rearrange_rows()
-
-    def rearrange_rows(self):
-        """ rearrange grid after deleting a row """
-        for row in range(len(self.toy_inputs)):
-            for col in range(5):
-                item = self.input_grid_layout.itemAtPosition(row, col)
-                if item:
-                    widget = item.widget()
-                    if widget:
-                        # re-insert cells in the correct row
-                        self.input_grid_layout.addWidget(widget, row, col)
+        self.toy_inputs.pop(row-1)
 
     def solve(self):
         #data extraction from GUI
@@ -129,3 +113,5 @@ if __name__ == '__main__':
     window = ToyFactoryGUI()
     window.show()
     sys.exit(app.exec_())
+
+
