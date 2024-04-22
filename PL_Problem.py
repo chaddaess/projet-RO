@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QGridLayout
 from gurobipy import GRB
 from GurobiSolver import GurobiSolverBuilder
+from PyQt5.QtWidgets import QPlainTextEdit, QSizePolicy
 # GUI styles
 style_sheet = """
     QWidget {
@@ -84,8 +85,14 @@ class ToyFactoryGUI(QWidget):
         self.solve_btn = QPushButton('Solve')
         self.solve_btn.clicked.connect(self.solve)
         self.layout.addWidget(self.solve_btn)
-
         self.setLayout(self.layout)
+
+        #  display the solution
+        self.solution_display = QPlainTextEdit()
+        self.solution_display.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.solution_display.setReadOnly(True)  # Make the text read-only
+        self.solution_display.setHidden(True)  # Initially hidden
+        self.layout.addWidget(self.solution_display)
 
     def add_toy(self):
         # Create a new tuple for the inputs of the current toy
@@ -162,7 +169,8 @@ class ToyFactoryGUI(QWidget):
         print("demand constraints:", demand_constraints)
         print("benefits", benefits)
         print("availabilty resources", availability_resources)
-
+        #unhide the plain text 
+        self.solution_display.setHidden(False)
         builder = GurobiSolverBuilder()
         solver = (builder
                     .add_variables(nb_toys, names=[f"Toy_{i+1}" for i in range(nb_toys)])
@@ -174,11 +182,16 @@ class ToyFactoryGUI(QWidget):
                     .build()
                 )
         solver.solve()
-        solution=solver.get_variables()
-        print("Solution:")
+
+        # Extract the solution
+        solution = solver.get_variables()
+        solution_text = "Solution:\n"
         for var_name, var_value in solution.items():
-            print(f"{var_name} = {var_value}")
-        print("Optimal Objective Value:", solver.get_objective_value())
+            solution_text += f"{var_name} = {var_value}\n"
+        solution_text += f"Optimal Objective Value: {solver.get_objective_value()}\n"
+
+        # Update the QPlainTextEdit with the solution
+        self.solution_display.setPlainText(solution_text)
 
 # instantiate and display the GUI
 if __name__ == '__main__':
