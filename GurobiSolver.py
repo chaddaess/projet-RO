@@ -32,7 +32,7 @@ class GurobiSolverBuilder:
         return self
 
     def add_constraints(self, name="constraints"):
-        self.model.addConstrs((gp.quicksum(self.constraints_LHS[j][i]*self.decision_variables[i] for i in range(
+        self.model.addConstrs((gp.quicksum(self.constraints_LHS[i][j]*self.decision_variables[i] for i in range(
             len(self.decision_variables))) <= self.constraints_RHS[j] for j in range(len(self.constraints_RHS))), name=name)
         return self
 
@@ -84,7 +84,7 @@ class GurobiSolver:
 # if __name__ == "__main__":
 #     builder = GurobiSolverBuilder()
 #     prix = [700, 900]
-#     ressources_consommations = [[3, 5], [1, 2], [50, 20]]
+#     ressources_consommations = [[3, 5,4], [1, 2,5], [50, 20,6]]
 #     ressources_disponibilité = [3600, 1600, 48000]
 #     solver = (builder
 #               .add_variables(len(prix))
