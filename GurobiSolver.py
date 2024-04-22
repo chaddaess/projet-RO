@@ -6,17 +6,9 @@ class GurobiSolverBuilder:
     def __init__(self):
         self.decision_variables = []
         self.coeff_decision_variables = []
-
+        self.constraints_RHS = []
+        self.constraints_LHS = []
         self.model = gp.Model()
-
-    def add_variable(self, name, lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS):
-        self.decision_variables.append(self.model.addVar(
-            name=name, lb=lb, ub=ub, vtype=vtype))
-        return self
-
-    def add_constraint(self, expr, sense, rhs, name=""):
-        self.model.addConstr(expr, sense, rhs, name=name)
-        return self
 
     def set_objective(self, sense=GRB.MINIMIZE):
         self.model.setObjective(gp.quicksum(
@@ -27,9 +19,26 @@ class GurobiSolverBuilder:
         self.coeff_decision_variables = list
         return self
 
-    def add_constraints(self, left, right, name=""):
-        self.model.addConstrs((gp.quicksum(left[j][i]*self.decision_variables[i] for i in range(
-            len(self.decision_variables))) <= right[j] for j in range(len(right))), name=name)
+    def set_constraints_LHS(self, LHS):
+        self.constraints_LHS = LHS
+        return self
+
+    def set_constraints_RHS(self, RHS):
+        self.constraints_RHS = RHS
+        return self
+
+    def add_constraint(self, expr, sense, rhs, name=""):
+        self.model.addConstr(expr, sense, rhs, name=name)
+        return self
+
+    def add_constraints(self, name="constraints"):
+        self.model.addConstrs((gp.quicksum(self.constraints_LHS[j][i]*self.decision_variables[i] for i in range(
+            len(self.decision_variables))) <= self.constraints_RHS[j] for j in range(len(self.constraints_RHS))), name=name)
+        return self
+
+    def add_variable(self, name, lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS):
+        self.decision_variables.append(self.model.addVar(
+            name=name, lb=lb, ub=ub, vtype=vtype))
         return self
 
     def add_variables(self, number_of_variables, names=None, lbs=None, ubs=None, vtypes=None):
@@ -46,6 +55,7 @@ class GurobiSolverBuilder:
         return self
 
     def build(self):
+        self = self.add_constraints()
         return GurobiSolver(self.model)
 
 
@@ -77,13 +87,12 @@ class GurobiSolver:
 #     ressources_consommations = [[3, 5], [1, 2], [50, 20]]
 #     ressources_disponibilité = [3600, 1600, 48000]
 #     solver = (builder
-#               .add_variables(2)
-#               .add_constraints(
-#                   ressources_consommations, ressources_disponibilité)
+#               .add_variables(len(prix))
 #               .set_coeff_decision_variables(prix)
+#               .set_constraints_LHS(ressources_consommations)
+#               .set_constraints_RHS(ressources_disponibilité)
 #               .set_objective(GRB.MAXIMIZE)
 #               .build()
 #               )
 #     solver.solve()
 #     print(solver.get_variables())
-
