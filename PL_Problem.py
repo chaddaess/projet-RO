@@ -168,13 +168,11 @@ class ToyFactoryGUI(QWidget):
                     .add_variables(nb_toys, names=[f"Toy_{i+1}" for i in range(nb_toys)])
                     .set_constraints_LHS(consumption_resources)
                     .set_constraints_RHS(availability_resources)  
-                    .add_constraints( consumption_resources, availability_resources)  
+                    .add_constraints(name="my_constraints")  
                     .set_coeff_decision_variables(benefits)  
                     .set_objective(GRB.MAXIMIZE)  # Maximizing profit
+                    .build()
                 )
-        for i in range(nb_toys):
-            solver = solver.add_constraint(solver.decision_variables[i], GRB.LESS_EQUAL, demand_constraints[i], name=f"Demand_{i+1}")
-        solver = solver.build()
         solver.solve()
         solution=solver.get_variables()
         print("Solution:")
