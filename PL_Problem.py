@@ -1,5 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QGridLayout
+from gurobipy import GRB
+
+from GurobiSolver import GurobiSolverBuilder
 # GUI styles
 style_sheet = """
     QWidget {
@@ -130,22 +133,40 @@ class ToyFactoryGUI(QWidget):
         benefits = []
         consumption_resources = []
         demand_constraints = []
+         # Extract data for each toy
         for toy_input in self.toy_inputs:
             hours = float(toy_input[0].text())
             machine_hours = float(toy_input[1].text())
             wood = float(toy_input[2].text())
             price = float(toy_input[3].text())
             demand = float(toy_input[4].text())
+            # Calculate benefit for the toy
             toy_benefit = price - wood * wood_price - hours * salary_hour
+            # Collect consumption resources for the toy
             toy_consumption_resources = [hours, machine_hours, wood]
             benefits.append(toy_benefit)
             consumption_resources.append(toy_consumption_resources)
+             # Collect demand constraints for the toy
             demand_constraints.append(demand)
         print("consumption resources:", consumption_resources)
         print("demand constraints:", demand_constraints)
         print("benefits", benefits)
         print("availabilty resources",availability_resources)
 
+        builder = GurobiSolverBuilder()
+        solver = (builder
+                    .add_variables(nb_toys, names=[f"Toy_{i+1}" for i in range(nb_toys)])  
+                    .add_constraints(consumption_resources, availability_resources)  
+                    .set_coeff_decision_variables(benefits)  
+                    .set_objective(GRB.MAXIMIZE)  # Maximizing profit
+                    .build()
+                )
+        solver.solve()
+        solution=solver.get_variables()
+        print("Solution:")
+        for var_name, var_value in solution.items():
+            print(f"{var_name} = {var_value}")
+        print("Optimal Objective Value:", solver.get_objective_value())
 
 # instantiate and display the GUI
 if __name__ == '__main__':
