@@ -129,7 +129,7 @@ class ToyFactoryGUI(QWidget):
         max_nb_workers = float(self.max_workers_input.text())
         salary_hour = float(self.salary_input.text())
         max_hours_manual_work = max_hours_per_worker*max_nb_workers
-        availability_resources = [max_hours_manual_work, max_machine_hours, max_wood, max_nb_workers]
+        availability_resources = [max_hours_manual_work, max_machine_hours, max_wood]
         benefits = []
         consumption_resources = []
         demand_constraints = []
@@ -156,11 +156,13 @@ class ToyFactoryGUI(QWidget):
         builder = GurobiSolverBuilder()
         solver = (builder
                     .add_variables(nb_toys, names=[f"Toy_{i+1}" for i in range(nb_toys)])  
-                    .add_constraints(consumption_resources, availability_resources)  
+                    .add_constraints( consumption_resources, availability_resources)  
                     .set_coeff_decision_variables(benefits)  
                     .set_objective(GRB.MAXIMIZE)  # Maximizing profit
-                    .build()
                 )
+        for i in range(nb_toys):
+            solver = solver.add_constraint(solver.decision_variables[i], GRB.LESS_EQUAL, demand_constraints[i], name=f"Demand_{i+1}")
+        solver = solver.build()
         solver.solve()
         solution=solver.get_variables()
         print("Solution:")
