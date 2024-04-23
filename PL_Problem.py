@@ -169,8 +169,10 @@ class ToyFactoryGUI(QWidget):
         print("demand constraints:", demand_constraints)
         print("benefits", benefits)
         print("availabilty resources", availability_resources)
+        
         #unhide the plain text 
         self.solution_display.setHidden(False)
+
         builder = GurobiSolverBuilder()
         solver = (builder
                     .add_variables(nb_toys, names=[f"Toy_{i+1}" for i in range(nb_toys)])
