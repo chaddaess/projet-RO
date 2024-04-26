@@ -14,11 +14,11 @@ class GurobiSolverBuilder:
     def set_objective(self, coeffs, senses):
         self.objectives.append((coeffs, senses))
         return self
-    
+
     def set_objective_multiple(self):
         for coeffs, senses in self.objectives:
             self.model.setObjective(gp.quicksum(
-                coeffs[i] * self.decision_variables[i] for i in range(len(self.decision_variables))), senses.pop(0))
+                coeffs[i] * self.decision_variables[i] for i in range(len(self.decision_variables))), senses)
 
     def set_coeff_decision_variables(self, list=[]):
         self.coeff_decision_variables = list
@@ -105,17 +105,21 @@ class GurobiSolver:
 
 
 # Example usage
-builder = GurobiSolverBuilder()
-builder.add_variables(2, names=['x1', 'x2'])
-builder.set_constraints_LHS([[1, 0], [0, 1]])  # x1 <= 10, x2 <= 20
-builder.set_constraints_RHS([10, 20])
-builder.set_objective([1, 0], [GRB.MINIMIZE])  # Minimize x1
-builder.set_objective([0, 1], [GRB.MAXIMIZE])  # Maximize x2
-solver = builder.build()
-solver.solve()
-optimal_solution = solver.get_variables()
-print("Optimal Solution:")
-print(optimal_solution)
-objective_values = solver.get_objective_value()
-print("Objective Values:")
-print(objective_values)
+# builder = GurobiSolverBuilder()
+# builder.add_variables(2, names=['x1', 'x2'])
+# builder.set_constraints_LHS([[1, 0], [0, 1]])  # x1 <= 10, x2 <= 20
+# builder.set_constraints_RHS([10, 20])
+# objectives = [
+#     ([1, 0], GRB.MINIMIZE),  # Minimize x1
+#     ([0, 1], GRB.MAXIMIZE)   # Maximize x2
+# ]
+# for coeffs, sense in objectives:
+#     builder.set_objective(coeffs, sense)
+# solver = builder.build()
+# solver.solve()
+# optimal_solution = solver.get_variables()
+# print("Optimal Solution:")
+# print(optimal_solution)
+# objective_values = solver.get_objective_value()
+# print("Objective Values:")
+# print(objective_values)

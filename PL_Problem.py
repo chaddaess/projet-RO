@@ -186,7 +186,7 @@ class ToyFactoryGUI(QWidget):
                   .set_constraints_RHS(availability_resources)
                   .add_constraints(name="my_constraints")
                   .set_coeff_decision_variables(benefits)
-                  .set_objective(GRB.MAXIMIZE)  # Maximizing profit
+                  .set_objective(benefits, GRB.MAXIMIZE)  # Maximizing profit
                   .build()
                   )
         solver.solve()
