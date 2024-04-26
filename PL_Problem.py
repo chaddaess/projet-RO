@@ -179,7 +179,6 @@ class ToyFactoryGUI(QWidget):
                     .set_constraints_LHS(consumption_resources)
                     .set_constraints_RHS(availability_resources)  
                     .add_constraints(name="my_constraints")  
-                    .set_coeff_decision_variables(benefits)  
                     .set_objective(benefits,GRB.MAXIMIZE)  # Maximizing profit
                     .build()
                 )
