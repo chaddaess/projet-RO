@@ -5,7 +5,6 @@ from gurobipy import GRB
 class GurobiSolverBuilder:
     def __init__(self):
         self.decision_variables = []
-        self.coeff_decision_variables = []
         self.constraints_RHS = []
         self.constraints_LHS = []
         self.objectives = []
@@ -19,10 +18,6 @@ class GurobiSolverBuilder:
         for coeffs, senses in self.objectives:
             self.model.setObjective(gp.quicksum(
                 coeffs[i] * self.decision_variables[i] for i in range(len(self.decision_variables))), senses)
-
-    def set_coeff_decision_variables(self, list=[]):
-        self.coeff_decision_variables = list
-        return self
 
     def set_constraints_LHS(self, LHS):
         self.constraints_LHS = LHS
@@ -112,7 +107,7 @@ class GurobiSolver:
 # objectives = [
 #     ([1, 0], GRB.MINIMIZE),  # Minimize x1
 #     ([0, 1], GRB.MAXIMIZE)   # Maximize x2
-# ]
+# ]  
 # for coeffs, sense in objectives:
 #     builder.set_objective(coeffs, sense)
 # solver = builder.build()
