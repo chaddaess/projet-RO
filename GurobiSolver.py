@@ -40,6 +40,7 @@ class GurobiSolverBuilder:
         self.decision_variables.append(self.model.addVar(
             name=name, lb=lb, ub=ub, vtype=vtype))
         return self
+
     def add_variables(self, number_of_variables, names=None, lbs=None, ubs=None, vtypes=None):
         if names is None:
             names = [("x " + str(i)) for i in range(number_of_variables)]

@@ -36,13 +36,15 @@ class ToyFactoryGUI(QWidget):
         self.layout = QVBoxLayout()
 
         # input field for maximum work hours per day
-        self.max_hours_per_worker_label = QLabel('Maximum  hours of work (per worker) per day')
+        self.max_hours_per_worker_label = QLabel(
+            'Maximum  hours of work (per worker) per day')
         self.max_hours_per_worker_input = QLineEdit()
         self.layout.addWidget(self.max_hours_per_worker_label)
         self.layout.addWidget(self.max_hours_per_worker_input)
 
         # input field for maximum hours of machine work per day
-        self.max_hours_machine_label = QLabel('Maximum  hours of machine work per day')
+        self.max_hours_machine_label = QLabel(
+            'Maximum  hours of machine work per day')
         self.max_hours_machine_input = QLineEdit()
         self.layout.addWidget(self.max_hours_machine_label)
         self.layout.addWidget(self.max_hours_machine_input)
@@ -89,15 +91,18 @@ class ToyFactoryGUI(QWidget):
 
         #  display the solution
         self.solution_display = QPlainTextEdit()
-        self.solution_display.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.solution_display.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.solution_display.setReadOnly(True)  # Make the text read-only
         self.solution_display.setHidden(True)  # Initially hidden
         self.layout.addWidget(self.solution_display)
 
     def add_toy(self):
         # Create a new tuple for the inputs of the current toy
-        toy_inputs = (QLineEdit(), QLineEdit(), QLineEdit(), QLineEdit(), QLineEdit())
-        labels = ['Hours of manual work', 'Hours of machine work', 'Kilos of wood', 'Selling price', 'Maximum sold']
+        toy_inputs = (QLineEdit(), QLineEdit(),
+                      QLineEdit(), QLineEdit(), QLineEdit())
+        labels = ['Hours of manual work', 'Hours of machine work',
+                  'Kilos of wood', 'Selling price', 'Maximum sold']
 
         # Add the QLineEdit objects to the grid layout
         row = len(self.toy_inputs) + 1  # Add 1 to account for the labels row
@@ -136,11 +141,12 @@ class ToyFactoryGUI(QWidget):
         max_nb_workers = float(self.max_workers_input.text())
         salary_hour = float(self.salary_input.text())
         max_hours_manual_work = max_hours_per_worker * max_nb_workers
-        availability_resources = [max_hours_manual_work, max_machine_hours, max_wood]
+        availability_resources = [
+            max_hours_manual_work, max_machine_hours, max_wood]
         benefits = []
         consumption_resources = []
         demand_constraints = []
-         # Extract data for each toy
+        # Extract data for each toy
         for toy_input in self.toy_inputs:
             hours = float(toy_input[0].text())
             machine_hours = float(toy_input[1].text())
@@ -153,10 +159,10 @@ class ToyFactoryGUI(QWidget):
             toy_consumption_resources = [hours, machine_hours, wood]
             benefits.append(toy_benefit)
             consumption_resources.append(toy_consumption_resources)
-             # Collect demand constraints for the toy
+            # Collect demand constraints for the toy
             demand_constraints.append(demand)
 
-        #add 1s and 0s to consumption resources (left hand of constraint expression)
+        # add 1s and 0s to consumption resources (left hand of constraint expression)
         for i in range(nb_toys):
             extra_columns = []
             for j in range(nb_toys):
@@ -164,25 +170,25 @@ class ToyFactoryGUI(QWidget):
             consumption_resources[i].extend(extra_columns)
         # add demand constraint of each toy to availabity_resources (right hand expression)
         for i in range(nb_toys):
-           availability_resources.append(demand_constraints[i])
+            availability_resources.append(demand_constraints[i])
         print("consumption resources:", consumption_resources)
         print("demand constraints:", demand_constraints)
         print("benefits", benefits)
         print("availabilty resources", availability_resources)
-        
-        #unhide the plain text 
+
+        # unhide the plain text
         self.solution_display.setHidden(False)
 
         builder = GurobiSolverBuilder()
         solver = (builder
-                    .add_variables(nb_toys, names=[f"Toy_{i+1}" for i in range(nb_toys)])
-                    .set_constraints_LHS(consumption_resources)
-                    .set_constraints_RHS(availability_resources)  
-                    .add_constraints(name="my_constraints")  
-                    .set_coeff_decision_variables(benefits)  
-                    .set_objective(GRB.MAXIMIZE)  # Maximizing profit
-                    .build()
-                )
+                  .add_variables(nb_toys, names=[f"Toy_{i+1}" for i in range(nb_toys)])
+                  .set_constraints_LHS(consumption_resources)
+                  .set_constraints_RHS(availability_resources)
+                  .add_constraints(name="my_constraints")
+                  .set_coeff_decision_variables(benefits)
+                  .set_objective(GRB.MAXIMIZE)  # Maximizing profit
+                  .build()
+                  )
         solver.solve()
 
         # Extract the solution
@@ -194,6 +200,7 @@ class ToyFactoryGUI(QWidget):
 
         # Update the QPlainTextEdit with the solution
         self.solution_display.setPlainText(solution_text)
+
 
 # instantiate and display the GUI
 if __name__ == '__main__':

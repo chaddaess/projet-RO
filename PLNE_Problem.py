@@ -23,7 +23,8 @@ class CelebrityWidget(QWidget):
         self.add_celebrity_button = QPushButton('Add Celebrity')
         self.add_celebrity_button.clicked.connect(self.addCelebrity)
 
-        self.find_celebrity_list_button = QPushButton('Find the optimal guest list')
+        self.find_celebrity_list_button = QPushButton(
+            'Find the optimal guest list')
         self.find_celebrity_list_button.clicked.connect(self.findCelebrityList)
 
         # Summary label widgets
@@ -35,7 +36,8 @@ class CelebrityWidget(QWidget):
         # Celebrity list widget
         self.celebrity_list_label = QLabel('List of all celebrities')
         self.celebrity_list = QListWidget()
-        self.celebrity_list.setSelectionMode(QListWidget.MultiSelection)  # Enable multiple selection
+        self.celebrity_list.setSelectionMode(
+            QListWidget.MultiSelection)  # Enable multiple selection
 
         # Layout for ship weight input
         input_layout = QHBoxLayout()
@@ -64,7 +66,8 @@ class CelebrityWidget(QWidget):
 
     def addCelebrity(self):
         celebrity_dialog = CelebrityDialog(self)
-        existing_celebrities = [self.celebrity_list.item(i).text().split(' - ')[0] for i in range(self.celebrity_list.count())]
+        existing_celebrities = [self.celebrity_list.item(i).text().split(
+            ' - ')[0] for i in range(self.celebrity_list.count())]
         celebrity_dialog.updateProblemsWithList(existing_celebrities)
 
         if celebrity_dialog.exec_() == QDialog.Accepted:
@@ -74,8 +77,10 @@ class CelebrityWidget(QWidget):
             popularity = float(celebrity_dialog.value_added_edit.text())
             is_vip = celebrity_dialog.vip_checkbox.isChecked()
             problems_with_items = celebrity_dialog.problems_with_list.selectedItems()
-            problems_with = [item.text() for item in problems_with_items] if problems_with_items else None
-            self.addCelebrityToList(name, salary, mass, popularity, is_vip, problems_with)
+            problems_with = [
+                item.text() for item in problems_with_items] if problems_with_items else None
+            self.addCelebrityToList(
+                name, salary, mass, popularity, is_vip, problems_with)
 
     def addCelebrityToList(self, name, salary, mass, popularity, is_vip, problems_with):
         item_text = f'{name} - Salary: {salary} - Mass: {mass} - Popularity Index: {popularity} - VIP: {is_vip}'
@@ -83,27 +88,29 @@ class CelebrityWidget(QWidget):
             problems_with_str = ' - Problems with: ' + ', '.join(problems_with)
             item_text += problems_with_str
         item = QListWidgetItem(item_text)
-        item.setData(1000, (name, salary, mass, popularity, is_vip, problems_with))
+        item.setData(1000, (name, salary, mass,
+                     popularity, is_vip, problems_with))
         self.celebrity_list.addItem(item)
 
     def findCelebrityList(self):
         total_celebrities = self.celebrity_list.count()
         if total_celebrities == 0:
-            QMessageBox.warning(self, 'Warning', 'Please add at least one celebrity.')
+            QMessageBox.warning(
+                self, 'Warning', 'Please add at least one celebrity.')
             return
         # Check if ship weight is valid
-        if not(self.weight_edit.text()) or not(self.weight_edit.text().replace('.', '', 1).isdigit())  or (float(self.weight_edit.text()) <= 0):
-            QMessageBox.warning(self, 'Invalid Value', 'Ship weight must be given a positive value.')
+        if not (self.weight_edit.text()) or not (self.weight_edit.text().replace('.', '', 1).isdigit()) or (float(self.weight_edit.text()) <= 0):
+            QMessageBox.warning(self, 'Invalid Value',
+                                'Ship weight must be given a positive value.')
             return
         # Check if budget is valid
-        if not(self.budget_edit.text()) or not(self.budget_edit.text().replace('.', '', 1).isdigit())  or (float(self.budget_edit.text()) <= 0):
-            QMessageBox.warning(self, 'Invalid Value', 'Maximum budget must be given a positive value.')
+        if not (self.budget_edit.text()) or not (self.budget_edit.text().replace('.', '', 1).isdigit()) or (float(self.budget_edit.text()) <= 0):
+            QMessageBox.warning(self, 'Invalid Value',
+                                'Maximum budget must be given a positive value.')
             return
         ship_weight = float(self.weight_edit.text())
         budget = float(self.budget_edit.text())
-        
-        
-        
+
     def displayOptimalGuestList(self, solution_values):
         self.summary_text.clear()
         self.summary_label.setVisible(True)
@@ -122,20 +129,22 @@ class CelebrityWidget(QWidget):
             item = self.celebrity_list.item(i)
             if not item:
                 continue
-            
+
             item_text = item.text()
             celebrity_name = item_text.split(' - ')[0]
             variable_key = f'x_{i}'
 
             if variable_key in solution_values and solution_values[variable_key] > 0.5:
                 selected_celebrities.append(celebrity_name)
-                _, salary, mass, popularity, vip_status = item_text.split(' - ')
+                _, salary, mass, popularity, vip_status = item_text.split(
+                    ' - ')
                 try:
                     salary_value = float(salary.split(': ')[1])
                     mass_value = float(mass.split(': ')[1])
                     popularity_value = float(popularity.split(': ')[1])
-                    is_vip = vip_status.split(': ')[1]=="True"
-                    print(f"{celebrity_name}: {salary_value}, {mass_value}, {popularity_value}, {is_vip}")
+                    is_vip = vip_status.split(': ')[1] == "True"
+                    print(
+                        f"{celebrity_name}: {salary_value}, {mass_value}, {popularity_value}, {is_vip}")
 
                     # Calculate totals
                     total_people += 1
@@ -150,27 +159,32 @@ class CelebrityWidget(QWidget):
                         non_vip_celebrities.append(celebrity_name)
 
                 except ValueError as e:
-                    print(f"Error processing celebrity item: {item_text}. Error: {e}")
+                    print(
+                        f"Error processing celebrity item: {item_text}. Error: {e}")
 
         if selected_celebrities:
-            
 
             # Display total statistics
-            self.summary_text.addItem(f"Total Number of People: {total_people}")
-            self.summary_text.addItem(f"Average Popularity Index: {total_popularity / total_people if total_people > 0 else 0.0}%")
+            self.summary_text.addItem(
+                f"Total Number of People: {total_people}")
+            self.summary_text.addItem(
+                f"Average Popularity Index: {total_popularity / total_people if total_people > 0 else 0.0}%")
             self.summary_text.addItem(f"Total Mass: {total_mass} Kg")
             self.summary_text.addItem(f"Total Salary: ${total_salary}")
-            self.summary_text.addItem(f"------------------------------------------------------")
+            self.summary_text.addItem(
+                f"------------------------------------------------------")
             if vip_celebrities:
                 self.summary_text.addItem("VIP Celebrities:")
                 for vip in vip_celebrities:
                     self.summary_text.addItem(vip)
-                self.summary_text.addItem(f"------------------------------------------------------")
+                self.summary_text.addItem(
+                    f"------------------------------------------------------")
             if non_vip_celebrities:
                 self.summary_text.addItem("Non-VIP Celebrities:")
                 for non_vip in non_vip_celebrities:
                     self.summary_text.addItem(non_vip)
-                self.summary_text.addItem(f"------------------------------------------------------")
+                self.summary_text.addItem(
+                    f"------------------------------------------------------")
             self.summary_text.addItem("Selected Celebrities:")
             for celebrity in selected_celebrities:
                 self.summary_text.addItem(celebrity)
@@ -194,7 +208,8 @@ class CelebrityDialog(QDialog):
         self.vip_checkbox = QCheckBox('VIP')
         self.problems_with_label = QLabel('Problems with:')
         self.problems_with_list = QListWidget()
-        self.problems_with_list.setSelectionMode(QListWidget.MultiSelection)  # Enable multiple selection
+        self.problems_with_list.setSelectionMode(
+            QListWidget.MultiSelection)  # Enable multiple selection
 
         layout.addWidget(QLabel('Celebrity Name:'))
         layout.addWidget(self.name_edit)
@@ -209,7 +224,8 @@ class CelebrityDialog(QDialog):
         layout.addWidget(self.problems_with_list)
 
         # Create button box with OK and Cancel buttons
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
 
@@ -222,13 +238,17 @@ class CelebrityDialog(QDialog):
 
     def accept(self):
         if self.name_edit.text() == '':
-            QMessageBox.critical(self, 'Error', 'Please enter the celebrity name.')
+            QMessageBox.critical(
+                self, 'Error', 'Please enter the celebrity name.')
         elif self.salary_edit.text() == '' or not self.salary_edit.text().replace('.', '', 1).isdigit():
-            QMessageBox.critical(self, 'Error', 'Please enter a valid salary (decimal number).')
+            QMessageBox.critical(
+                self, 'Error', 'Please enter a valid salary (decimal number).')
         elif self.mass_edit.text() == '' or not self.mass_edit.text().replace('.', '', 1).isdigit():
-            QMessageBox.critical(self, 'Error', 'Please enter a valid mass (decimal number).')
+            QMessageBox.critical(
+                self, 'Error', 'Please enter a valid mass (decimal number).')
         elif self.value_added_edit.text() == '' or not self.value_added_edit.text().replace('.', '', 1).isdigit() or int(self.value_added_edit.text()) > 100:
-            QMessageBox.critical(self, 'Error', 'Please enter a valid popularity index (decimal number <= 100).')
+            QMessageBox.critical(
+                self, 'Error', 'Please enter a valid popularity index (decimal number <= 100).')
         else:
             super().accept()
 
