@@ -13,8 +13,10 @@ class GurobiSolverBuilder:
 
     def set_objective(self, coeffs, senses):
         self.objectives.append((coeffs, senses))
-    def set_objective(self, coeffs, senses):
-        self.objectives.append((coeffs, senses))
+        return self
+
+    def set_objectives(self, objectives):
+        self.objectives = objectives
         return self
 
     def set_objective_multiple(self):
@@ -84,25 +86,6 @@ class GurobiSolver:
     def get_objective_value(self):
         return self.model.objVal
 
-
-# Example Usage:
-# if __name__ == "__main__":
-#     builder = GurobiSolverBuilder()
-#     prix = [700, 900]
-#     ressources_consommations = [[3, 5,4], [1, 2,5], [50, 20,6]]
-#     ressources_disponibilité = [3600, 1600, 48000]
-#     solver = (builder
-#               .add_variables(len(prix))
-#               .set_coeff_decision_variables(prix)
-#               .set_constraints_LHS(ressources_consommations)
-#               .set_constraints_RHS(ressources_disponibilité)
-#               .set_objective(GRB.MAXIMIZE)
-#               .build()
-#               )
-#     solver.solve()
-#     print(solver.get_variables())
-
-
 # Example usage
 # builder = GurobiSolverBuilder()
 # builder.add_variables(2, names=['x1', 'x2'])
@@ -111,27 +94,7 @@ class GurobiSolver:
 # objectives = [
 #     ([1, 0], GRB.MINIMIZE),  # Minimize x1
 #     ([0, 1], GRB.MAXIMIZE)   # Maximize x2
-# ]  
-# for coeffs, sense in objectives:
-#     builder.set_objective(coeffs, sense)
-# solver = builder.build()
-# solver.solve()
-# optimal_solution = solver.get_variables()
-# print("Optimal Solution:")
-# print(optimal_solution)
-# objective_values = solver.get_objective_value()
-# print("Objective Values:")
-# print(objective_values)
-
-# Example usage
-# builder = GurobiSolverBuilder()
-# builder.add_variables(2, names=['x1', 'x2'])
-# builder.set_constraints_LHS([[1, 0], [0, 1]])  # x1 <= 10, x2 <= 20
-# builder.set_constraints_RHS([10, 20])
-# objectives = [
-#     ([1, 0], GRB.MINIMIZE),  # Minimize x1
-#     ([0, 1], GRB.MAXIMIZE)   # Maximize x2
-# ]  
+# ]
 # for coeffs, sense in objectives:
 #     builder.set_objective(coeffs, sense)
 # solver = builder.build()
