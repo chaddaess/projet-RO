@@ -8,6 +8,7 @@ class CelebrityWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.problem_relationships = {}  # Dictionary to store problem relationships
 
     def initUI(self):
         self.setWindowTitle('Who will be your celebrity guests?')
@@ -109,7 +110,6 @@ class CelebrityWidget(QWidget):
         self.summary_label.setVisible(True)
         self.summary_text.setVisible(True)
 
-        # Map solution values to celebrity names and attributes
         selected_celebrities = []
         total_people = 0
         total_popularity = 0.0
@@ -118,24 +118,27 @@ class CelebrityWidget(QWidget):
         vip_celebrities = []
         non_vip_celebrities = []
 
+        # Iterate over the decision variables and gather statistics for selected celebrities
         for i in range(self.celebrity_list.count()):
             item = self.celebrity_list.item(i)
             if not item:
                 continue
             
-            item_text = item.text()
-            celebrity_name = item_text.split(' - ')[0]
-            variable_key = f'x_{i}'
-
-            if variable_key in solution_values and solution_values[variable_key] > 0.5:
+            celebrity_name = item.text().split(' - ')[0]
+            if f'x_{i}' in solution_values and solution_values[f'x_{i}'] > 0.5:
                 selected_celebrities.append(celebrity_name)
-                _, salary, mass, popularity, vip_status = item_text.split(' - ')
+
+                # Retrieve celebrity attributes
+                salary_str = item.text().split(' - ')[1].split(': ')[1]
+                mass_str = item.text().split(' - ')[2].split(': ')[1]
+                popularity_str = item.text().split(' - ')[3].split(': ')[1]
+                vip_status = item.text().split(' - ')[4].split(': ')[1]
+
                 try:
-                    salary_value = float(salary.split(': ')[1])
-                    mass_value = float(mass.split(': ')[1])
-                    popularity_value = float(popularity.split(': ')[1])
-                    is_vip = vip_status.split(': ')[1]=="True"
-                    print(f"{celebrity_name}: {salary_value}, {mass_value}, {popularity_value}, {is_vip}")
+                    salary_value = float(salary_str)
+                    mass_value = float(mass_str)
+                    popularity_value = float(popularity_str)
+                    is_vip = vip_status == 'True'
 
                     # Calculate totals
                     total_people += 1
@@ -150,12 +153,10 @@ class CelebrityWidget(QWidget):
                         non_vip_celebrities.append(celebrity_name)
 
                 except ValueError as e:
-                    print(f"Error processing celebrity item: {item_text}. Error: {e}")
+                    print(f"Error processing celebrity item: {item.text()}. Error: {e}")
 
         if selected_celebrities:
-            
-
-            # Display total statistics
+            # Display total statistics based on selected celebrities
             self.summary_text.addItem(f"Total Number of People: {total_people}")
             self.summary_text.addItem(f"Average Popularity Index: {total_popularity / total_people if total_people > 0 else 0.0}%")
             self.summary_text.addItem(f"Total Mass: {total_mass} Kg")

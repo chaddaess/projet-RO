@@ -52,6 +52,22 @@ class GurobiMultiObjectiveSolver:
     def get_all_variable_values(self):
         return {var.varName: var.x for var in self.model.getVars()}
 
+    def add_mutual_exclusion_constraint(self, problem_relationships):
+        for celeb, problems in problem_relationships.items():
+            celeb_index = None
+            related_indices = []
+            for i, var in enumerate(self.decision_variables):
+                if var.varName == celeb:
+                    celeb_index = i
+                if var.varName in problems:
+                    related_indices.append(i)
+            if celeb_index is not None and related_indices:
+                expr = gp.LinExpr()
+                expr.addTerms(1, self.decision_variables[celeb_index])
+                expr.addTerms(1, [self.decision_variables[idx] for idx in related_indices])
+                self.model.addConstr(expr, GRB.LESS_EQUAL, 1)
+        return self
+
 
 # Example usage to solve the celebrity selection problem
 if __name__ == "__main__":
@@ -85,9 +101,14 @@ if __name__ == "__main__":
     is_vip = [False, True, False, True, False]  # Example: VIP status of celebrities
     builder.add_constraint(gp.quicksum(builder.decision_variables[i] for i in range(num_celebrities) if is_vip[i]), GRB.GREATER_EQUAL, 1)
 
-    # Mutual exclusion constraint (dynamic): Implement this based on your specific problem
-    # Example: Ensure that if two celebrities have problems with each other, they cannot both be selected
-    # builder.add_constraint(expr, GRB.LESS_EQUAL, 1)
+    # Problem relationships (mutual exclusion constraints)
+    problem_relationships = {
+        "x_0": ["x_1"],  # Example: Celeb 0 has problems with Celeb 1
+        "x_2": ["x_3", "x_4"]  # Example: Celeb 2 has problems with Celeb 3 and Celeb 4
+    }
+
+    # Add mutual exclusion constraints
+    builder.add_mutual_exclusion_constraint(problem_relationships)
 
     # Build and solve the model
     builder.build()
