@@ -115,34 +115,42 @@ class CelebrityWidget(QWidget):
         budget = float(self.budget_edit.text())
         variable_names = [f'x_{i}' for i in range(total_celebrities)]
 
-        is_vip_list = []
-        for i in range(total_celebrities):
-            _, salary, mass, popularity, vip_status = self.celebrity_list.item(i).text().split(
-                ' - ')
-            is_vip_list.append(int(vip_status.split(': ')[1] == "True"))
-        print(is_vip_list)
-
         constraints_LHS = []
         popularities = []
         negative_salaries = []
         exists_in_boat = []
         for i in range(total_celebrities):
             item_text = self.celebrity_list.item(i).text()
-            _, salary, mass, popularity, vip_status = item_text.split(
-                ' - ')
+            salary = item_text.split(' - ')[1]
+            mass = item_text.split(' - ')[2]
+            popularity = item_text.split(' - ')[3]
+            vip_status = item_text.split(' - ')[4]
             salary = float(salary.split(': ')[1])
             mass = float(mass.split(': ')[1])
             popularity = float(popularity.split(': ')[1])
             item_list = [mass, salary, -
                          int(vip_status.split(': ')[1] == "True")]
-            constraints_LHS.append(item_list)
+            # try:
+            #     problems_with = item_text.split(' - ')[5]
+            #     problems_with = problems_with.split(': ')[1]
+            #     problems_with = problems_with.split(', ')
+            # except:
+            #     problems_with = []
+            # for item in problems_with:
 
+            #     for j in range(total_celebrities):
+            #         name= self.celebrity_list.item(j).text().split(' - ')[0].split(': ')[1]
+            #         if(item==name):
+            #             item_list.append(1)
+
+            constraints_LHS.append(item_list)
             negative_salaries.append(-salary)
             popularities.append(popularity)
             exists_in_boat.append(1)
         objectives = [
             (popularities, GRB.MAXIMIZE), (negative_salaries, GRB.MAXIMIZE), (exists_in_boat, GRB.MAXIMIZE)]
         constraints_RHS = [ship_weight, budget, -1]
+
         builder = GurobiSolverBuilder()
         solver = (builder.add_variables(
             total_celebrities, names=variable_names, vtypes=[GRB.BINARY for i in range(total_celebrities)])
@@ -151,8 +159,12 @@ class CelebrityWidget(QWidget):
             .set_constraints_RHS(constraints_RHS)
             .build())
         solver.solve()
-        print(solver.get_variables())
-        self.displayOptimalGuestList(solver.get_variables())
+        solution_status = solver.get_solution_status()
+        if solution_status == GRB.OPTIMAL:
+            solution_values = solver.get_variables()
+            self.displayOptimalGuestList(solution_values)
+        else:
+            QMessageBox.warning(self, 'Warning', 'No optimal solution found.')
 
     def displayOptimalGuestList(self, solution_values):
         self.summary_text.clear()

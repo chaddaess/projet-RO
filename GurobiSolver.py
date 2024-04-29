@@ -62,7 +62,6 @@ class GurobiSolverBuilder:
     def build(self):
         self = self.add_constraints()
         self.set_objective_multiple()
-        self.set_objective_multiple()
         return GurobiSolver(self.model)
 
 
@@ -73,14 +72,17 @@ class GurobiSolver:
     def solve(self):
         self.model.optimize()
 
+    def get_solution_status(self):
+        return self.model.status
+
     def get_variable(self, name):
-        return self.model.getVarByName(name).x
+        return self.model.getVarByName(name).X
 
     def get_variables(self):
         vars = {}
         for var in self.model.getVars():
-            print(var.varName, '=', var.x)
-            vars[var.varName] = var.x
+            print(var.varName, '=', var.X)
+            vars[var.varName] = var.X
         return vars
 
     def get_objective_value(self):
