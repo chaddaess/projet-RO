@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QGridLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox
 from gurobipy import GRB
 from GurobiSolver import GurobiSolverBuilder
 from PyQt5.QtWidgets import QPlainTextEdit, QSizePolicy
@@ -132,6 +132,15 @@ class ToyFactoryGUI(QWidget):
         self.toy_inputs.pop(row - 1)
 
     def solve(self):
+         # Check for negative inputs
+        negative_inputs = [self.max_hours_per_worker_input, self.max_hours_machine_input,
+                       self.max_wood_input, self.max_workers_input,
+                       self.salary_input, self.wood_price_input]
+        for input_field in negative_inputs:
+            if float(input_field.text()) < 0:
+                error_message = "Error: Negative input value detected. Please enter non-negative values."
+                QMessageBox.critical(self, "Input Error", error_message)
+                return  # Stop execution if negative input is found
         # data extraction from GUI
         nb_toys = len(self.toy_inputs)
         max_hours_per_worker = float(self.max_hours_per_worker_input.text())
