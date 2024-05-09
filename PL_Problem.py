@@ -138,10 +138,10 @@ class ToyFactoryGUI(QWidget):
                        self.salary_input, self.wood_price_input]
         for input_field in negative_inputs:
             if float(input_field.text()) < 0:
-                error_message = "Error: Negative input value detected !!! Please enter non-negative values!!!"
+                error_message = "Error: Negative input value detected !!! Please enter non-negative values !!!"
                 QMessageBox.critical(self, "Input Error", error_message)
                 return  # Stop execution if negative input is found
-        
+       
         # data extraction from GUI
         nb_toys = len(self.toy_inputs)
         max_hours_per_worker = float(self.max_hours_per_worker_input.text())
@@ -158,11 +158,13 @@ class ToyFactoryGUI(QWidget):
         demand_constraints = []
         # Extract data for each toy
         for toy_input in self.toy_inputs:
+            #error handling for negative inputs
             for field_index in range(5):  
                 if float(toy_input[field_index].text()) < 0:
                     error_message = "Error: Negative input value detected for toy-specific inputs. Please enter non-negative values."
                     QMessageBox.critical(self, "Input Error", error_message)
                     return 
+            
             hours = float(toy_input[0].text())
             machine_hours = float(toy_input[1].text())
             wood = float(toy_input[2].text())
@@ -191,7 +193,7 @@ class ToyFactoryGUI(QWidget):
         print("benefits", benefits)
         print("availabilty resources", availability_resources)
 
-        # unhide the plain text
+        # unhide solution display
         self.solution_display.setHidden(False)
 
         builder = GurobiSolverBuilder()
@@ -211,9 +213,11 @@ class ToyFactoryGUI(QWidget):
         for var_name, var_value in solution.items():
             solution_text += f"{var_name} = {var_value}\n"
         solution_text += f"Optimal Objective Value: {solver.get_objective_value()}\n"
-
         # Update the QPlainTextEdit with the solution
         self.solution_display.setPlainText(solution_text)
+        font = self.solution_display.font()
+        font.setPointSize(12)  
+        self.solution_display.setFont(font)
 
 
 # instantiate and display the GUI
