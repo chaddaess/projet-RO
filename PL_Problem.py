@@ -132,15 +132,21 @@ class ToyFactoryGUI(QWidget):
         self.toy_inputs.pop(row - 1)
 
     def solve(self):
-        # Check for negative inputs
-        negative_inputs = [self.max_hours_per_worker_input, self.max_hours_machine_input,
-                       self.max_wood_input, self.max_workers_input,
-                       self.salary_input, self.wood_price_input]
-        for input_field in negative_inputs:
-            if float(input_field.text()) < 0:
-                error_message = "Error: Negative input value detected !!! Please enter non-negative values !!!"
-                QMessageBox.critical(self, "Input Error", error_message)
-                return  # Stop execution if negative input is found
+        # Check for negative inputs and empty fields in the main input fields
+        input_labels = {
+        self.max_hours_per_worker_input: "Maximum hours per worker",
+        self.max_hours_machine_input: "Maximum hours of machine work",
+        self.max_wood_input: "Maximum kilos of wood",
+        self.max_workers_input: "Number of workers available",
+        self.salary_input: "Salary of one worker per hour",
+        self.wood_price_input: "Price of one kilo of wood"
+        }
+
+        for input_field, label in input_labels.items():
+            if input_field.text() == '' or not input_field.text().replace('.', '', 1).isdigit():
+                error_message = f"Error: Please enter a valid number for {label}"
+                QMessageBox.critical(self, 'Error', error_message)
+                return
        
         # data extraction from GUI
         nb_toys = len(self.toy_inputs)
@@ -158,12 +164,19 @@ class ToyFactoryGUI(QWidget):
         demand_constraints = []
         # Extract data for each toy
         for toy_input in self.toy_inputs:
-            #error handling for negative inputs
+            
             for field_index in range(5):  
-                if float(toy_input[field_index].text()) < 0:
-                    error_message = "Error: Negative input value detected for toy-specific inputs. Please enter non-negative values."
-                    QMessageBox.critical(self, "Input Error", error_message)
-                    return 
+                # Check if the text is empty
+                if toy_input[field_index].text() == '':
+                    QMessageBox.critical(
+                        self, 'Error', 'Error: Please enter ' + toy_input[field_index].placeholderText())
+                    return  
+                
+                # Check if the text contains a valid number
+                if not toy_input[field_index].text().replace('.', '', 1).isdigit():
+                    QMessageBox.critical(
+                        self, 'Error', 'Error: Please enter a valid number for ' + toy_input[field_index].placeholderText())
+                    return  
             
             hours = float(toy_input[0].text())
             machine_hours = float(toy_input[1].text())
