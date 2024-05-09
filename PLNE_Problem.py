@@ -52,13 +52,6 @@ style_sheet="""
     DeleteButton:pressed{
         background-color:black
     }"""
-class SolveButton(QPushButton):
-    def __init__(self, title, parent=None):
-        super().__init__(title, parent)
-
-class DeleteButton(QPushButton):
-    def __init__(self, title, parent=None):
-        super().__init__(title, parent)
 
 class CelebrityWidget(QWidget):
     def __init__(self):
@@ -67,35 +60,44 @@ class CelebrityWidget(QWidget):
         self.problem_relationships = {}  # Dictionary to store problem relationships
 
     def initUI(self):
-        self.setWindowTitle('What items will you select?')
+        self.setWindowTitle('Who will be your celebrity guests?')
         self.resize(800, 500)
+        
+        self.min_vip_label = QLabel('Minimum VIP Celebrities:')
+        self.min_vip_edit = QLineEdit()
+        self.min_vip_edit.setPlaceholderText('Enter minimum number...')
+        # Layout for minimum VIP input
+        vip_layout = QHBoxLayout()
+        vip_layout.addWidget(self.min_vip_label)
+        vip_layout.addWidget(self.min_vip_edit)
+
         button1 = QPushButton(
         'Go back to Home Page')
         button1.setStyleSheet("font-size: 16px; font-family: 'Arial'; color: #233154 ; padding: 10px;font-weight: bold;")
         button1.clicked.connect(self.open_homepage)
 
         # Widgets for ship weight and budget input
-        self.weight_label = QLabel('Constraint')
+        self.weight_label = QLabel('Total ship weight (Kg):')
         self.weight_edit = QLineEdit()
 
-        self.budget_label = QLabel('Maximum budget:')
+        self.budget_label = QLabel('Maximum budget ($):')
         self.budget_edit = QLineEdit()
 
-        self.add_celebrity_button = QPushButton('Add Item')
+        self.add_celebrity_button = QPushButton('Add Celebrity')
         self.add_celebrity_button.clicked.connect(self.addCelebrity)
 
-        self.find_celebrity_list_button = SolveButton(
-            'Find the optimal selection list')
+        self.find_celebrity_list_button = QPushButton(
+            'Find the optimal guest list')
         self.find_celebrity_list_button.clicked.connect(self.findCelebrityList)
 
         # Summary label widgets
-        self.summary_label = QLabel('Optimal selection:')
+        self.summary_label = QLabel('Optimal guest list and statistics:')
         self.summary_text = QListWidget()
         self.summary_label.setVisible(False)
         self.summary_text.setVisible(False)
 
         # Celebrity list widget
-        self.celebrity_list_label = QLabel('List of selected items')
+        self.celebrity_list_label = QLabel('List of all celebrities')
         self.celebrity_list = QListWidget()
         self.celebrity_list.setSelectionMode(
             QListWidget.MultiSelection)  # Enable multiple selection
@@ -118,6 +120,7 @@ class CelebrityWidget(QWidget):
         main_layout = QVBoxLayout()
         main_layout.addWidget(button1)
         main_layout.addLayout(input_layout)
+        main_layout.addLayout(vip_layout) 
         main_layout.addLayout(button_layout)
         main_layout.addWidget(self.summary_label)
         main_layout.addWidget(self.summary_text)
@@ -158,95 +161,103 @@ class CelebrityWidget(QWidget):
 
     def findCelebrityList(self):
         total_celebrities = self.celebrity_list.count()
+        
         if total_celebrities == 0:
-            QMessageBox.warning(
-                self, 'Warning', 'Please add at least one item')
+            QMessageBox.warning(self, 'Warning', 'Please add at least one celebrity.')
             return
-        # Check if ship weight is valid
-        if not (self.weight_edit.text()) or not (self.weight_edit.text().replace('.', '', 1).isdigit()) or (float(self.weight_edit.text()) <= 0):
-            QMessageBox.warning(self, 'Invalid Value',
-                                'Ship weight must be given a positive value.')
+        
+        # Validate ship weight
+        ship_weight_text = self.weight_edit.text()
+        if not ship_weight_text or not ship_weight_text.replace('.', '', 1).isdigit() or float(ship_weight_text) <= 0:
+            QMessageBox.warning(self, 'Invalid Value', 'Ship weight must be a positive value.')
             return
-        # Check if budget is valid
-        if not (self.budget_edit.text()) or not (self.budget_edit.text().replace('.', '', 1).isdigit()) or (float(self.budget_edit.text()) <= 0):
-            QMessageBox.warning(self, 'Invalid Value',
-                                'Maximum budget must be given a positive value.')
+        ship_weight = float(ship_weight_text)
+        
+        # Validate budget
+        budget_text = self.budget_edit.text()
+        if not budget_text or not budget_text.replace('.', '', 1).isdigit() or float(budget_text) <= 0:
+            QMessageBox.warning(self, 'Invalid Value', 'Maximum budget must be a positive value.')
             return
-        ship_weight = float(self.weight_edit.text())
-        budget = float(self.budget_edit.text())
-        variable_names = [f'x_{i}' for i in range(total_celebrities)]
-
+        budget = float(budget_text)
+        
+        # Retrieve minimum number of VIP celebrities from the input field
+        try:
+            min_vip_count = int(self.min_vip_edit.text())
+            if min_vip_count < 0:
+                QMessageBox.warning(self, 'Invalid Value', 'Minimum VIP count must be a non-negative integer.')
+                return
+        except ValueError:
+            QMessageBox.warning(self, 'Invalid Value', 'Please enter a valid integer for minimum VIP count.')
+            return
+        
+        # Build Gurobi model
+        builder = GurobiSolverBuilder()
+        solver_builder = builder.add_variables(total_celebrities, names=[f'x_{i}' for i in range(total_celebrities)], vtypes=[GRB.BINARY]*total_celebrities)
+        
         constraints_LHS = []
-        constraints_RHS = []
+        constraints_RHS = [ship_weight, budget, -1]
         popularities = []
         negative_salaries = []
         exists_in_boat = []
+        
         for i in range(total_celebrities):
             item_text = self.celebrity_list.item(i).text()
-            salary = item_text.split(' - ')[1]
-            mass = item_text.split(' - ')[2]
-            popularity = item_text.split(' - ')[3]
-            vip_status = item_text.split(' - ')[4]
-            salary = float(salary.split(': ')[1])
-            mass = float(mass.split(': ')[1])
-            popularity = float(popularity.split(': ')[1])
-            item_list = [mass, salary, -
-                         int(vip_status.split(': ')[1] == "True")]
-            constraints_LHS.append(item_list)
+            salary = float(item_text.split(' - ')[1].split(': ')[1])
+            mass = float(item_text.split(' - ')[2].split(': ')[1])
+            popularity = float(item_text.split(' - ')[3].split(': ')[1])
+            vip_status = item_text.split(' - ')[4].split(': ')[1] == 'True'
+            
+            constraints_LHS.append([mass, salary, -int(vip_status)])
             negative_salaries.append(-salary)
             popularities.append(popularity)
             exists_in_boat.append(1)
-
-        constraints_RHS.extend([ship_weight, budget, -1])
-
-        # Define objectives for the solver
+        
         objectives = [
-            (popularities, GRB.MAXIMIZE), 
-            (negative_salaries, GRB.MAXIMIZE), 
+            (popularities, GRB.MAXIMIZE),
+            (negative_salaries, GRB.MAXIMIZE),
             (exists_in_boat, GRB.MAXIMIZE)
         ]
-
-        # Build the Gurobi solver instance
-        builder = GurobiSolverBuilder()
-        solver = (builder.add_variables(
-            total_celebrities, 
-            names=variable_names, 
-            vtypes=[GRB.BINARY for i in range(total_celebrities)])
-            .set_objectives(objectives)
-            .set_constraints_LHS(constraints_LHS)
-            .set_constraints_RHS(constraints_RHS)
-            .build())
-        #print ("objectives:  ", objectives)
-        # Mutual exclusion constraint based on problem relationships
-        for celeb, problems in self.problem_relationships.items():
-            celeb_index = next((i for i in range(total_celebrities) if self.celebrity_list.item(i).text().startswith(celeb)), None)
-            if celeb_index is not None:
-                related_indices = [i for i in range(total_celebrities) if any(self.celebrity_list.item(i).text().startswith(p) for p in problems)]
-                if related_indices:
-                    # If celeb is selected, none of the related_indices should be selected
-                    expr = gp.LinExpr()
-                    
-                    # Add the celebrity variable (xi) with its coefficient as the number of related problems
-                    expr.add(solver.decision_variables[celeb_index], len(related_indices))  
-                    
-                    # Add related variables (xj) with a coefficient of 1 each
-                    for idx in related_indices:
-                        expr.add(solver.decision_variables[idx], 1)
-                    print(expr)
-                    # Add the constraint that ensures the total count is less than or equal to the number of related problems
-                    solver.add_constraint(expr, GRB.LESS_EQUAL, len(related_indices))
-
         
-        # Solve the optimization problem
-        solver.solve()
-        solution_status = solver.get_solution_status()
-
-        # Process the solution if optimal
-        if solution_status == GRB.OPTIMAL:
-            solution_values = solver.get_variables()
-            self.displayOptimalGuestList(solution_values)
+        # Build the solver instance
+        solver = solver_builder.set_objectives(objectives).set_constraints_LHS(constraints_LHS).set_constraints_RHS(constraints_RHS).build()
+        
+        # Add constraint to ensure at least min_vip_count VIP celebrities are selected
+        vip_indices = [i for i in range(total_celebrities) if self.celebrity_list.item(i).text().endswith('VIP: True')]
+        if solver:
+            vip_count_expr = gp.quicksum(solver.decision_variables[idx] for idx in vip_indices)
+            solver.add_constraint(vip_count_expr, GRB.GREATER_EQUAL, min_vip_count)
+            
+            # Mutual exclusion constraint based on problem relationships
+            for celeb, problems in self.problem_relationships.items():
+                celeb_index = next((i for i in range(total_celebrities) if self.celebrity_list.item(i).text().startswith(celeb)), None)
+                if celeb_index is not None:
+                    related_indices = [i for i in range(total_celebrities) if any(self.celebrity_list.item(i).text().startswith(p) for p in problems)]
+                    if related_indices:
+                        # If celeb is selected, none of the related_indices should be selected
+                        expr = gp.LinExpr()
+                        
+                        # Add the celebrity variable (xi) with its coefficient as the number of related problems
+                        expr.add(solver.decision_variables[celeb_index], len(related_indices))  
+                        
+                        # Add related variables (xj) with a coefficient of 1 each
+                        for idx in related_indices:
+                            expr.add(solver.decision_variables[idx], 1)
+                        
+                        # Add the constraint that ensures the total count is less than or equal to the number of related problems
+                        solver.add_constraint(expr, GRB.LESS_EQUAL, len(related_indices))
+            
+            # Solve the optimization problem
+            solver.solve()
+            solution_status = solver.get_solution_status()
+        
+            # Process the solution if optimal
+            if solution_status == GRB.OPTIMAL:
+                solution_values = solver.get_variables()
+                self.displayOptimalGuestList(solution_values)
+            else:
+                QMessageBox.warning(self, 'Warning', 'No optimal solution found.')
         else:
-            QMessageBox.warning(self, 'Warning', 'No optimal solution found.')
+            QMessageBox.warning(self, 'Error', 'Failed to build Gurobi solver instance.')
 
     def displayOptimalGuestList(self, solution_values):
         self.summary_text.clear()
