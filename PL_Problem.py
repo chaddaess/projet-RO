@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdi
 from gurobipy import GRB
 from GurobiSolver import GurobiSolverBuilder
 from PyQt5.QtWidgets import QPlainTextEdit, QSizePolicy
+
 # GUI styles
 style_sheet = """
     QWidget {
@@ -34,6 +35,11 @@ class ToyFactoryGUI(QWidget):
         self.setWindowTitle('Toy Factory Profit Maximization')
         # arrange widgets vertically
         self.layout = QVBoxLayout()
+        button1 = QPushButton(
+            'Go back to Home Page')
+        button1.setStyleSheet("font-size: 16px; font-family: 'Arial'; color: #233154 ; padding: 10px;font-weight: bold;")
+        button1.clicked.connect(self.open_homepage)
+        self.layout.addWidget(button1)
 
         # input field for maximum work hours per day
         self.max_hours_per_worker_label = QLabel(
@@ -235,7 +241,14 @@ class ToyFactoryGUI(QWidget):
         else:
             self.solution_display.setPlainText("No solution found")
         
-
+    def open_homepage(self):
+        # Import inside the function to avoid circular import
+        from HomePage import HomePage
+        
+        self.hide()  # Hide the page
+        if not hasattr(self, 'homepage') or not self.homepage:  # Check if homepage is already created
+            self.homepage = HomePage()
+        self.homepage.show()
 
 # instantiate and display the GUI
 if __name__ == '__main__':

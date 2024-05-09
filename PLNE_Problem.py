@@ -62,6 +62,10 @@ class CelebrityWidget(QWidget):
     def initUI(self):
         self.setWindowTitle('Who will be your celebrity guests?')
         self.resize(800, 500)
+        button1 = QPushButton(
+        'Go back to Home Page')
+        button1.setStyleSheet("font-size: 16px; font-family: 'Arial'; color: #233154 ; padding: 10px;font-weight: bold;")
+        button1.clicked.connect(self.open_homepage)
 
         # Widgets for ship weight and budget input
         self.weight_label = QLabel('Total ship weight (Kg):')
@@ -105,6 +109,7 @@ class CelebrityWidget(QWidget):
 
         # Main layout
         main_layout = QVBoxLayout()
+        main_layout.addWidget(button1)
         main_layout.addLayout(input_layout)
         main_layout.addLayout(button_layout)
         main_layout.addWidget(self.summary_label)
@@ -308,6 +313,14 @@ class CelebrityWidget(QWidget):
                 self.summary_text.addItem(celebrity)
         else:
             self.summary_text.addItem("No celebrities selected.")
+    def open_homepage(self):
+        # Import inside the function to avoid circular import
+        from HomePage import HomePage
+        
+        self.hide()  # Hide the page
+        if not hasattr(self, 'homepage') or not self.homepage:  # Check if homepage is already created
+            self.homepage = HomePage()
+        self.homepage.show()
 
 class CelebrityDialog(QDialog):
     def __init__(self, parent=None):
