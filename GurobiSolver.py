@@ -8,7 +8,6 @@ class GurobiSolverBuilder:
         self.constraints_RHS = []
         self.constraints_LHS = []
         self.objectives = []
-        self.objectives = []
         self.model = gp.Model()
 
     def set_objective(self, coeffs, senses):
