@@ -220,17 +220,20 @@ class ToyFactoryGUI(QWidget):
                   )
         solver.solve()
 
+        if (solver.get_objective_value()!=0):
         # Extract the solution
-        solution = solver.get_variables()
-        solution_text = "Solution:\n"
-        for var_name, var_value in solution.items():
-            solution_text += f"{var_name} = {var_value}\n"
-        solution_text += f"Optimal Objective Value: {solver.get_objective_value()}\n"
-        font = self.solution_display.font()
-        font.setPointSize(12)  
-        self.solution_display.setFont(font)
-        # Update the QPlainTextEdit with the solution
-        self.solution_display.setPlainText(solution_text)
+            solution = solver.get_variables()
+            solution_text = "Solution:\n"
+            for var_name, var_value in solution.items():
+                solution_text += f"{var_name} = {var_value}\n"
+            solution_text += f"Optimal Objective Value: {solver.get_objective_value()}\n"
+            font = self.solution_display.font()
+            font.setPointSize(12)  
+            self.solution_display.setFont(font)
+            # Update the QPlainTextEdit with the solution
+            self.solution_display.setPlainText(solution_text)
+        else:
+            self.solution_display.setPlainText("No solution found")
         
 
 
