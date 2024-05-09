@@ -220,8 +220,6 @@ class ToyFactoryGUI(QWidget):
                   )
         solver.solve()
 
-        
-
         # Extract the solution
         solution = solver.get_variables()
         solution_text = "Solution:\n"
@@ -231,9 +229,6 @@ class ToyFactoryGUI(QWidget):
         font = self.solution_display.font()
         font.setPointSize(12)  
         self.solution_display.setFont(font)
-        if not solver.solve():
-            self.solution_display.setPlainText("No solution found.")
-            return
         # Update the QPlainTextEdit with the solution
         self.solution_display.setPlainText(solution_text)
         
