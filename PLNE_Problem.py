@@ -204,7 +204,7 @@ class CelebrityWidget(QWidget):
             .set_constraints_LHS(constraints_LHS)
             .set_constraints_RHS(constraints_RHS)
             .build())
-
+        #print ("objectives:  ", objectives)
         # Mutual exclusion constraint based on problem relationships
         for celeb, problems in self.problem_relationships.items():
             celeb_index = next((i for i in range(total_celebrities) if self.celebrity_list.item(i).text().startswith(celeb)), None)
