@@ -23,7 +23,13 @@ style_sheet = """
         background-color: #258399;
     }
 """
+class SolveButton(QPushButton):
+    def __init__(self, title, parent=None):
+        super().__init__(title, parent)
 
+class DeleteButton(QPushButton):
+    def __init__(self, title, parent=None):
+        super().__init__(title, parent)
 
 # GUI definition
 class ToyFactoryGUI(QWidget):
@@ -32,11 +38,10 @@ class ToyFactoryGUI(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('Toy Factory Profit Maximization')
+        self.setWindowTitle('Production Problem')
         # arrange widgets vertically
         self.layout = QVBoxLayout()
-        button1 = QPushButton(
-            'Go back to Home Page')
+        button1 = QPushButton('Go back to Home Page')
         button1.setStyleSheet("font-size: 16px; font-family: 'Arial'; color: #233154 ; padding: 10px;font-weight: bold;")
         button1.clicked.connect(self.open_homepage)
         self.layout.addWidget(button1)
@@ -56,7 +61,7 @@ class ToyFactoryGUI(QWidget):
         self.layout.addWidget(self.max_hours_machine_input)
 
         # input field for maximum kilos of wood per day
-        self.max_wood_label = QLabel('Maximum  kilos of wood  per day')
+        self.max_wood_label = QLabel('Maximum  raw materials  per day')
         self.max_wood_input = QLineEdit()
         self.layout.addWidget(self.max_wood_label)
         self.layout.addWidget(self.max_wood_input)
@@ -74,13 +79,13 @@ class ToyFactoryGUI(QWidget):
         self.layout.addWidget(self.salary_input)
 
         # input field for price of one kilo of wood
-        self.wood_price_label = QLabel('Price of one kilo of wood')
+        self.wood_price_label = QLabel('Cost of one unit of raw materials')
         self.wood_price_input = QLineEdit()
         self.layout.addWidget(self.wood_price_label)
         self.layout.addWidget(self.wood_price_input)
 
         # button to add toy
-        self.add_toy_btn = QPushButton('Add Toy')
+        self.add_toy_btn = QPushButton('Add item')
         self.add_toy_btn.clicked.connect(self.add_toy)
         self.layout.addWidget(self.add_toy_btn)
 
@@ -90,7 +95,7 @@ class ToyFactoryGUI(QWidget):
         self.add_toy()
         self.layout.addLayout(self.input_grid_layout)
 
-        self.solve_btn = QPushButton('Solve')
+        self.solve_btn = SolveButton('Solve')
         self.solve_btn.clicked.connect(self.solve)
         self.layout.addWidget(self.solve_btn)
         self.setLayout(self.layout)
@@ -108,7 +113,7 @@ class ToyFactoryGUI(QWidget):
         toy_inputs = (QLineEdit(), QLineEdit(),
                       QLineEdit(), QLineEdit(), QLineEdit())
         labels = ['Hours of manual work', 'Hours of machine work',
-                  'Kilos of wood', 'Selling price', 'Maximum sold']
+                  'Matière Première', 'Selling price', 'Maximum sold']
 
         # Add the QLineEdit objects to the grid layout
         row = len(self.toy_inputs) + 1  # Add 1 to account for the labels row
@@ -118,7 +123,7 @@ class ToyFactoryGUI(QWidget):
 
         # Add a remove button for each toy except the first
         if row != 1:
-            remove_btn = QPushButton('Remove')
+            remove_btn = DeleteButton('Remove')
             remove_btn.clicked.connect(lambda: self.remove_toy(row))
             self.input_grid_layout.addWidget(remove_btn, row, 5)
             self.toy_inputs.append(toy_inputs)
@@ -145,7 +150,7 @@ class ToyFactoryGUI(QWidget):
         self.max_wood_input: "Maximum kilos of wood",
         self.max_workers_input: "Number of workers available",
         self.salary_input: "Salary of one worker per hour",
-        self.wood_price_input: "Price of one kilo of wood"
+        self.wood_price_input: "Price of matiere première"
         }
 
         for input_field, label in input_labels.items():
@@ -217,7 +222,7 @@ class ToyFactoryGUI(QWidget):
 
         builder = GurobiSolverBuilder()
         solver = (builder
-                  .add_variables(nb_toys, names=[f"Toy_{i+1}" for i in range(nb_toys)])
+                  .add_variables(nb_toys, names=[f"Item_{i+1}" for i in range(nb_toys)])
                   .set_constraints_LHS(consumption_resources)
                   .set_constraints_RHS(availability_resources)
                   .add_constraints(name="my_constraints")

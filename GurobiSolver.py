@@ -19,9 +19,13 @@ class GurobiSolverBuilder:
         return self
 
     def set_objective_multiple(self):
-        for coeffs, senses in self.objectives:
-            self.model.setObjective(gp.quicksum(
-                coeffs[i] * self.decision_variables[i] for i in range(len(self.decision_variables))), senses)
+        for count ,(coeffs, senses) in enumerate(self.objectives):
+            if count == 0:
+                self.model.setObjective(gp.quicksum(
+                coeffs[i] * self.decision_variables[i] for i in range(len(self.decision_variables))), sense=senses)
+            else:
+                self.model.setObjectiveN(gp.quicksum(
+                coeffs[i] * self.decision_variables[i] for i in range(len(self.decision_variables))), index=count,priority=count)
 
     def set_constraints_LHS(self, LHS):
         self.constraints_LHS = LHS

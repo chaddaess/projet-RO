@@ -1,8 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from HomePage import HomePage
-# GUI styles
-style_sheet = """
+# GUI stylesstyle_sheet =
+style_sheet="""
     QWidget {
         background-color: white;
     }
@@ -16,8 +16,8 @@ style_sheet = """
         border-color: #33a6cc; /* Focus color */
     }
     QPushButton {
-        background-color: #BED7DC; /* Light purple */
-        color: white;
+        background-color: #71a0a5; /* Light purple */
+        color: #233154;
         font-size: 16px;
         padding: 5px;
         border-radius: 5px;
@@ -34,10 +34,11 @@ style_sheet = """
     }
 
     SolveButton:pressed {
-        background-color: #C6EBC5; /* Green */
+        background-color: #79d1c3; /* Green */
         color: white;
     }
     DeleteButton{
+    color:white;
         background-color:#DD5746
     }
     DeleteButton:hover{

@@ -32,12 +32,12 @@ class HomePage(QWidget):
         layout.addWidget(label)
         layout.addWidget(gif_label)
         button1 = QPushButton(
-            'Go to PL-Problem (Toy Factory Profit Maximization)')
+            'Go to PL-Problem ( Production Problem)')
         button1.setStyleSheet("font-size: 16px; font-family: 'Arial'; color: #233154 ; padding: 10px;font-weight: bold;")
         button1.clicked.connect(self.open_page1)
         layout.addWidget(button1)
 
-        button2 = QPushButton('Go to PLNE-Problem (Celebrities)')
+        button2 = QPushButton('Selection Problem')
         button2.setStyleSheet("font-size: 16px; font-family: 'Arial'; color: #233154 ; padding: 10px; font-weight: bold;")
         button2.clicked.connect(self.open_page2)
         layout.addWidget(button2)

@@ -52,6 +52,13 @@ style_sheet="""
     DeleteButton:pressed{
         background-color:black
     }"""
+class SolveButton(QPushButton):
+    def __init__(self, title, parent=None):
+        super().__init__(title, parent)
+
+class DeleteButton(QPushButton):
+    def __init__(self, title, parent=None):
+        super().__init__(title, parent)
 
 class CelebrityWidget(QWidget):
     def __init__(self):
@@ -60,7 +67,7 @@ class CelebrityWidget(QWidget):
         self.problem_relationships = {}  # Dictionary to store problem relationships
 
     def initUI(self):
-        self.setWindowTitle('Who will be your celebrity guests?')
+        self.setWindowTitle('What items will you select?')
         self.resize(800, 500)
         button1 = QPushButton(
         'Go back to Home Page')
@@ -68,27 +75,27 @@ class CelebrityWidget(QWidget):
         button1.clicked.connect(self.open_homepage)
 
         # Widgets for ship weight and budget input
-        self.weight_label = QLabel('Total ship weight (Kg):')
+        self.weight_label = QLabel('Constraint')
         self.weight_edit = QLineEdit()
 
-        self.budget_label = QLabel('Maximum budget ($):')
+        self.budget_label = QLabel('Maximum budget:')
         self.budget_edit = QLineEdit()
 
-        self.add_celebrity_button = QPushButton('Add Celebrity')
+        self.add_celebrity_button = QPushButton('Add Item')
         self.add_celebrity_button.clicked.connect(self.addCelebrity)
 
-        self.find_celebrity_list_button = QPushButton(
-            'Find the optimal guest list')
+        self.find_celebrity_list_button = SolveButton(
+            'Find the optimal selection list')
         self.find_celebrity_list_button.clicked.connect(self.findCelebrityList)
 
         # Summary label widgets
-        self.summary_label = QLabel('Optimal guest list and statistics:')
+        self.summary_label = QLabel('Optimal selection:')
         self.summary_text = QListWidget()
         self.summary_label.setVisible(False)
         self.summary_text.setVisible(False)
 
         # Celebrity list widget
-        self.celebrity_list_label = QLabel('List of all celebrities')
+        self.celebrity_list_label = QLabel('List of selected items')
         self.celebrity_list = QListWidget()
         self.celebrity_list.setSelectionMode(
             QListWidget.MultiSelection)  # Enable multiple selection
@@ -153,7 +160,7 @@ class CelebrityWidget(QWidget):
         total_celebrities = self.celebrity_list.count()
         if total_celebrities == 0:
             QMessageBox.warning(
-                self, 'Warning', 'Please add at least one celebrity.')
+                self, 'Warning', 'Please add at least one item')
             return
         # Check if ship weight is valid
         if not (self.weight_edit.text()) or not (self.weight_edit.text().replace('.', '', 1).isdigit()) or (float(self.weight_edit.text()) <= 0):
